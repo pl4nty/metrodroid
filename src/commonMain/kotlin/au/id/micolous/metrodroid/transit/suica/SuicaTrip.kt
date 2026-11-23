@@ -76,7 +76,7 @@ class SuicaTrip (val balance: Int,
                 isTVM -> Mode.TICKET_MACHINE
                 consoleType == 0xc8 -> Mode.VENDING_MACHINE
                 consoleType == 0xc7 -> Mode.POS
-                consoleTypeInt == CONSOLE_BUS.toByte().toInt() -> Mode.BUS
+                isBus(consoleTypeInt) -> Mode.BUS
                 else -> Mode.METRO
             }
         }
@@ -124,6 +124,7 @@ class SuicaTrip (val balance: Int,
 
     companion object {
         private const val CONSOLE_BUS = 0x05
+        private const val CONSOLE_BUS_AIRPORT = 0x22
         private const val CONSOLE_CHARGE = 0x02
         
         /**
@@ -141,6 +142,18 @@ class SuicaTrip (val balance: Int,
             val consoleType = consoleTypeInt and 0xFF
             val tvmConsoleTypes = intArrayOf(0x03, 0x07, 0x08, 0x12, 0x13, 0x14, 0x15)
             return consoleType in tvmConsoleTypes
+        }
+
+        /**
+         * Console types whose records carry a bus operator/stop code (IruCa table) instead of
+         * rail line/station codes.
+         *
+         * 0x22 has been seen on a Haneda Airport bus fare (Keikyu Bus, operator 0xc69, process
+         * type 0x1d). Treating it as rail looks up a meaningless station.
+         */
+        private fun isBus(consoleTypeInt: Int): Boolean {
+            val consoleType = consoleTypeInt and 0xFF
+            return consoleType == CONSOLE_BUS || consoleType == CONSOLE_BUS_AIRPORT
         }
 
         fun parse(block: FelicaBlock, previousBalance: Int): SuicaTrip {
@@ -195,7 +208,7 @@ class SuicaTrip (val balance: Int,
             } else if (isProductSale || mProcessType == CONSOLE_CHARGE.toByte().toInt()) {
                 startStation = null
                 endStation = null
-            } else if (consoleTypeInt == CONSOLE_BUS.toByte().toInt()) {
+            } else if (isBus(consoleTypeInt)) {
                 val busLineCode = data.byteArrayToInt(6, 2)
                 val busStopCode = data.byteArrayToInt(8, 2)
                 startStation = SuicaDBUtil.getBusStop(regionCode, busLineCode, busStopCode)
