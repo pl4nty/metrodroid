@@ -65,6 +65,10 @@ class SmartRiderTagRecord(
                 StationTableReader.getStation(SMARTRIDER_STR, mStopId)
             // TODO: Handle other modes of transit. Stops there are a combination of the
             // route + Stop (ie: route A stop 3 != route B stop 3)
+            mSmartRiderType == SmartRiderType.SMARTRIDER ->
+                RAIL_REPLACEMENT_STOPS[Pair(mRoute.unformatted, mStopId)]?.let {
+                    StationTableReader.getStation(SMARTRIDER_STR, it)
+                } ?: Station.unknown(mStopId)
             else -> Station.unknown(mStopId)
         }
 
@@ -109,6 +113,18 @@ class SmartRiderTagRecord(
 
     companion object {
         private const val TAG = "SmartRiderTagRecord"
+
+        /**
+         * Rail replacement bus stops at train stations, keyed by (route, stop ID) and mapped to
+         * that station's train reader ID in the SmartRider MdST. Bus stop IDs are only unique
+         * within a route.
+         *
+         * These were observed on cards, not taken from an official source.
+         */
+        private val RAIL_REPLACEMENT_STOPS = mapOf(
+            // Airport/Midland line replacement bus, boarded at Maylands (November 2026)
+            Pair("902F", 0x7) to 0x2806,
+        )
 
         private fun routeName(input: ImmutableByteArray): FormattedString {
             val cleaned = input.dataCopy.filter { it != 0.toByte() }.toByteArray().toImmutable()
