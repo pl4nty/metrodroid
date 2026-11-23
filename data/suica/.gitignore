@@ -1,0 +1,11 @@
+suica_rail.csv
+suica_rail.mdst
+suica_bus.csv
+suica_bus.mdst
+rail_*.csv
+bus_*.csv
+commit_info.json
+NOTICE
+sha512ok
+LICENSE
+app/

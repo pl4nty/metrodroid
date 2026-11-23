@@ -42,6 +42,7 @@ WEB_TARGETS := \
 	ricaricami \
 	seq_go \
 	smartrider \
+	suica \
 	tfi_leap
 
 ALL_TARGETS := $(HERMETIC_TARGETS) $(WEB_TARGETS)
