@@ -1,0 +1,9 @@
+This software contains Japan IC card (Suica, PASMO, ICOCA, etc.) station and
+bus stop codes from two sources:
+
+* Farebot's station database, which was based on data from the IC SFCard Fan
+  project (http://www.denno.net/SFCardFan/).
+
+* suicanfc-kd by Kdroidwin (https://github.com/Kdroidwin/suicanfc-kd), which is
+  distributed under the following terms:
+

@@ -67,8 +67,8 @@ These are recommended examples to copy from:
 
 Don't do these anymore.
 
-* `ovc`, `suica`: These both import data from Farebot's sqlite3 format. This is
-  not recommended anymore.
+* `ovc`: Imports data from Farebot's sqlite3 format. This is not recommended
+  anymore. (`suica` used to do this too, see `suica/README.md`.)
 
 ## Git integration
 

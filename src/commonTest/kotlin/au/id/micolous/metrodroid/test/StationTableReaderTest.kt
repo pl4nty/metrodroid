@@ -96,7 +96,9 @@ class StationTableReaderTest : BaseInstrumentedTest() {
 
     @Test
     fun testNotices() {
-        assertEquals(14, StationTableReader.allNotices.size)
+        // suica_rail and suica_bus each carry a notice for the suicanfc-kd data.
+        assertEquals(16, StationTableReader.allNotices.size)
+        assertTrue(StationTableReader.allNotices.any { it.contains("suicanfc-kd") })
         assertTrue(StationTableReader.allNotices.any { it.contains("Translink") })
     }
 

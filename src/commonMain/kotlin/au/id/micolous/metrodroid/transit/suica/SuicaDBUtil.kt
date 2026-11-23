@@ -33,23 +33,27 @@ object SuicaDBUtil {
     private const val SUICA_RAIL_STR = "suica_rail"
 
     /**
-     * Gets bus stop information from the IruCa (イルカ) table.
+     * Gets bus stop information from the bus stop table (see data/suica).
      *
-     * @param lineCode    Bus line ID (line code)
+     * Stops are keyed by the full 16-bit operator (line) code and 16-bit stop code. If the
+     * stop is not known, this falls back to the operator's "common" (共通) entry, stop 0.
+     *
+     * @param lineCode    Bus operator / line ID (line code)
      * @param stationCode Bus stop ID (station code)
-     * @return If the stop is known, a Station is returned describing it. If the stop is unknown,
-     * or there was some other database error, null is returned.
+     * @return If the stop or its operator is known, a Station is returned describing it. If both
+     * codes are 0, null is returned. Otherwise, an unknown Station is returned.
      */
     internal fun getBusStop(regionCode: Int, lineCode: Int, stationCode: Int): Station? {
-        val lineCodeLow = lineCode and 0xFF
-        val stationCodeLow = stationCode and 0xFF
-        val stationId = (lineCodeLow shl 8) + stationCodeLow
-        return if (stationId == 0) null else StationTableReader.getStation(SUICA_BUS_STR, stationId,
-                Localizer.localizeString(R.string.suica_bus_area_line_stop,
-                        NumberUtils.intToHex(regionCode),
-                        NumberUtils.intToHex(lineCodeLow),
-                        NumberUtils.intToHex(stationCodeLow)))
-
+        val line = lineCode and 0xFFFF
+        val stop = stationCode and 0xFFFF
+        if (line == 0 && stop == 0) return null
+        val humanReadableId = Localizer.localizeString(R.string.suica_bus_area_line_stop,
+                NumberUtils.intToHex(regionCode),
+                NumberUtils.intToHex(line),
+                NumberUtils.intToHex(stop))
+        return StationTableReader.getStationNoFallback(SUICA_BUS_STR, (line shl 16) or stop, humanReadableId)
+                ?: StationTableReader.getStationNoFallback(SUICA_BUS_STR, line shl 16, humanReadableId)
+                ?: Station.unknown(humanReadableId)
     }
 
     /**
